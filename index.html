@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foodventure Bandung</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navigation">
+        <div class="nav-brand">
+        <div>
+            <div style="font-weight: bold;">🍽️ Kuliner Bandung</div>
+            <div style="font-size: 0.8rem; color: #666; text-align: center;">Find the Best Taste</div>
+        </div>
+        </div>
+        <div class="nav-links">
+            <a href="#beranda" class="nav-link active">
+                <i class="fas fa-home"></i>
+                Beranda
+            </a>
+            <a href="#favorit" class="nav-link">
+                <i class="fas fa-heart"></i>
+                Favorit
+            </a>
+            <a href="#tentang" class="nav-link">
+                <i class="fas fa-info-circle"></i>
+                Tentang
+            </a>
+            <a href="#kontak" class="nav-link">
+                <i class="fa-solid fa-phone"></i>
+                Kontak
+            </a>
+        </div>
+    </nav>
+
+ <!-- Home Section -->
+    <div class="hero-section section" id="beranda">
+    <div class="hero-content">
+        <div class="hero-logo">
+            <i class="fas fa-utensils"></i>
+        </div>
+        <h1 class="hero-title">Foodventure Bandung</h1>  <!-- Ini masih ada -->
+        <p class="hero-subtitle">"Rasa Lokal, Petualangan Global"</p>
+    </div>
+    </div>
+
+    <div class="controls-section section">
+        <div class="search-filters">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Cari nama tempat makan atau makanan...">
+                <i class="fas fa-search"></i>
+            </div>
+            <select id="priceFilter">
+                <option value="">Semua Harga</option>
+                <option value="murah">Murah (&lt; 50k)</option>
+                <option value="sedang">Sedang (50k-100k)</option>
+                <option value="mahal">Mahal (&gt; 100k)</option>
+            </select>
+            <select id="ratingFilter">
+                <option value="">Semua Rating</option>
+                <option value="4.5">4.5+ ⭐</option>
+                <option value="4.0">4.0+ ⭐</option>
+                <option value="3.5">3.5+ ⭐</option>
+            </select>
+            <select id="typeFilter">
+                <option value="">Semua Jenis</option>
+                <option value="warung">Warung</option>
+                <option value="kafe">Kafe</option>
+                <option value="restaurant">Restoran</option>
+            </select>
+        </div>
+
+        <div class="category-tags">
+            <div class="category-tag" data-category="enak">🔥 Enak</div>
+            <div class="category-tag" data-category="murah">💰 Murah</div>
+            <div class="category-tag" data-category="hidden-gem">💎 Hidden Gem</div>
+            <div class="category-tag" data-category="romantis">💕 Romantis</div>
+            <div class="category-tag" data-category="keluarga">👨‍👩‍👧‍👦 Keluarga</div>
+            <div class="category-tag" data-category="instagramable">📸 Instagramable</div>
+        </div>
+    </div>
+
+    <!-- New Side-by-Side Wrapper -->
+    <div class="map-and-list-wrapper">
+        <div class="map-container section">
+            <div id="map"></div>
+        </div>
+        <div class="place-list section">
+            <h3><i class="fas fa-list"></i> Semua Tempat (<span id="placeCount">0</span>)</h3>
+            <div id="placesList"></div>
+        </div>
+    </div>
+
+    <!-- Modal for place details -->
+    <div id="placeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle"></h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Content will be populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+        <!-- Favorites Section -->
+        <section id="favorit" class="section">
+            <div class="section-header">
+                <i class="fas fa-heart"></i>
+                <h2>Tempat Favorit Anda</h2>
+            </div>
+            
+            <div class="favorites-header">
+                <div class="favorites-count">
+                    <i class="fas fa-heart"></i> <span id="favCount">0</span> Tempat Favorit
+                </div>
+                <button class="clear-all-btn" id="clearFavorites">
+                    <i class="fas fa-trash"></i> Hapus Semua
+                </button>
+            </div>
+            
+            <div id="favoritesList">
+                <div class="empty-favorites">
+                    <i class="fas fa-heart-broken"></i>
+                    <h3>Belum ada tempat favorit</h3>
+                    <p>Klik ❤️ pada tempat makan untuk menyimpannya di sini</p>
+                    <button class="browse-btn" onclick="document.querySelector('#beranda').scrollIntoView({ behavior: 'smooth' })">
+                        <i class="fas fa-search"></i> Jelajahi Tempat Makan
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="tentang" class="section">
+            <div class="section-header">
+                <i class="fas fa-info-circle"></i>
+                <h2>Tentang Kami</h2>
+            </div>
+            
+            <div class="section-content">
+                <div class="feature-card">
+                <p style="text-align: justify; font-size: large; line-height: 1.8;">Foodventure Bandung adalah platform digital yang didedikasikan untuk membantu masyarakat menemukan tempat makan terbaik di Kota Bandung. Kami memahami bahwa mencari tempat makan yang sesuai dengan selera dan budget bisa menjadi tantangan, terutama di kota yang kaya akan kuliner seperti Bandung.
+                    Kami berkomitmen untuk menyediakan informasi yang akurat, review yang jujur, dan rekomendasi yang dapat diandalkan. Setiap tempat makan yang kami rekomendasikan telah melalui proses kurasi yang ketat untuk memastikan kualitas dan pengalaman kuliner yang memuaskan.
+                </p>
+                </div>
+            
+            <div class="section-header">
+                    <i class="fas fa-bullseye"></i>
+                <h2 style="margin: 40px 5px;">Visi & Misi</h2>
+            </div> 
+            <div class="features-grid"> 
+             <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-eye"></i>
+            </div>
+                <h3 class="feature-title">Visi Kami</h3>
+                <p class="feature-description">Menjadi platform kuliner terdepan yang menghubungkan pecinta makanan dengan tempat makan terbaik di Bandung, menciptakan ekosistem kuliner yang berkembang dan berkelanjutan.</p>
+            </div> 
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-rocket"></i>
+            </div>
+                <h3 class="feature-title">Misi Kami</h3>
+                <p class="feature-description">Memudahkan masyarakat dalam menemukan kuliner berkualitas, mendukung pertumbuhan UMKM kuliner lokal, dan melestarikan kekayaan kuliner Bandung untuk generasi mendatang.</p>
+                </div> 
+            </div> 
+
+            <div class="section-header">
+                    <i class="fas fa-star"></i>
+                <h2 style="margin: 40px 5px;">Keunggulan Kami</h2>
+            </div>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-map-marked-alt"></i>
+                        </div>
+                        <h3 class="feature-title">Peta Interaktif & Akurat</h3>
+                        <p class="feature-description">Informasi lokasi yang akurat dengan integrasi peta interaktif untuk memudahkan Anda menemukan dan menuju tempat makan pilihan.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h3 class="feature-title">Ulasan Asli & Terpercaya</h3>
+                        <p class="feature-description">Baca ulasan jujur dari pengunjung lain yang aktif dan terpercaya untuk membantu keputusan kuliner Anda.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-filter"></i>
+                        </div>
+                        <h3 class="feature-title">Filter Lengkap</h3>
+                        <p class="feature-description">Temukan tempat makan berdasarkan lokasi, kategori makanan, harga, rating, dan lainnya dengan sistem pencarian yang canggih dan user-friendly.</p>
+                    </div>
+                </div>
+                
+                <div class="section-header">
+                    <i class="fas fa-chart-bar"></i>
+                <h2 style="margin: 40px 5px;">Pencapaian Kami</h2>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-number" id="totalPlaces">150+</span>
+                        <span class="stat-label">Tempat Makan</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number" id="totalReviews">2.500+</span>
+                        <span class="stat-label">Ulasan Pengguna</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number" id="avgRating">4.6</span>
+                        <span class="stat-label">Rating Rata-rata</span>
+                    </div>
+                </div>   
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="kontak" class="section">
+            <div class="section-header">
+                <i class="fas fa-phone"></i>
+                <h2>Hubungi Kami</h2>
+            </div>
+            
+            <div class="section-content">
+                <p>Ada pertanyaan atau saran? Hubungi kami melalui salah satu cara berikut:</p>
+                
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h4>Email</h4>
+                            <p>info@foodventurebandung.com</p>
+                            <p>great.bien1317@gmail.com</p>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h4>Telepon</h4>
+                            <p>+62 838 2072 4902</p>
+                            <p>+62 859 2256 3986</p>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h4>Alamat</h4>
+                            <p>Jl. Soekarno-Hatta, Bandung</p>
+                            <p>Jl. Laswi Siliwangi, Bandung</p>
+                        </div>
+                    </div>
+
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h4>Jam Operasional</h4>
+                            <p>Senin - Jumat: 09:00 - 18:00 <br>
+                            Sabtu - Minggu: 10:00 - 16:00</p>
+                        </div>
+                    </div>
+
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fa-solid fa-globe"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h4>Website</h4>
+                            <p>www.foodventurebandung.com</p>
+                            <p>www.greatbien.com</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="social-links">
+                    <a href="http://wa.me/6283820724902" target="_blank" class="social-link">
+                        <i class="fab fa-whatsapp"></i>
+                    </a>
+                    <a href="https://www.facebook.com/profile.php?id=100069700495602" target="_blank" class="social-link">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a href="https://x.com/Faka_s0917" target="_blank" class="social-link">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="https://www.instagram.com/fabianattala17/?next=%2F" target="_blank" class="social-link">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="https://github.com/Fakstilllearning" target="_blank" class="social-link">
+                        <i class="fab fa-github"></i>
+                    </a>
+                    <a href="https://t.me/fbn_kidd" target="_blank" class="social-link">
+                        <i class="fab fa-telegram"></i>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer class="footer">
+    <div class="footer-content">
+        <div class="footer-logo">
+            <i class="fas fa-utensils"></i> Foodventure Bandung
+        </div>
+        <div class="footer-links">
+            <a href="#beranda">Beranda</a>
+            <a href="#favorit">Favorit</a>
+            <a href="#tentang">Tentang</a>
+            <a href="#kontak">Kontak</a>
+        </div>
+        <div class="footer-social">
+            <a href="http://wa.me/6283820724902"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://www.facebook.com/profile.php?id=100069700495602"><i class="fab fa-facebook"></i></a>
+            <a href="https://x.com/Faka_s0917"><i class="fab fa-twitter"></i></a>
+            <a href="https://www.instagram.com/fabianattala17/?next=%2F"><i class="fab fa-instagram"></i></a>
+            <a href="https://github.com/Fakstilllearning"><i class="fab fa-github"></i></a>
+            <a href="https://t.me/fbn_kidd"><i class="fab fa-telegram"></i></a>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        &copy; 2024 Foodventure Bandung. All Rights Reserved.
+    </div>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Sample food place images (using placeholder images)
+        const placeImages = {
+            'bagi-kopi': '../gambar/bagi-kopi.jpg',
+            'cc-rajawali': '../gambar/cc-rajawali.jpg',
+            'gokana-ramen-teppan': '../gambar/gokana-ramen-teppan.jpg',
+            'mirukiway': '../gambar/mirukiway.jpg',
+            'bakso-japra': '../gambar/bakso-japra.jpg',
+            'babydutch-pancake': '../gambar/babydutch-pancake.jpg',
+            'brunswick-cafe': '../gambar/brunswick-cafe.webp',
+            'arasso': '../gambar/brunswick-cafe.webp',
+            'tom-sushi': '../gambar/tom-sushi.jpg',
+            'raa-cha': '../gambar/raa-cha.avif',
+            'kabobs': '../gambar/kabobs.jpg',
+            'carita-izakaya': '../gambar/carita-izakaya.jpg',
+            'caluna-all-day': '../gambar/caluna-all-day.webp',
+            'reddog': '../gambar/reddog.jpg',
+            'kisah-manis': '../gambar/kisah-manis.jpg',
+        };
+
+        // Enhanced food places data with additional features
+        const foodPlaces = [
+            {
+                id: 'bagi-kopi',
+                name: "Bagi Kopi",
+                type: "kafe",
+                lat: -6.938484685797509,
+                lng: 107.6645164948287,     
+                specialty: "Coffee & Tea",
+                openTime: "07:00",
+                closeTime: "21:00",
+                rating: 5.0,
+                priceRange: "murah",
+                categories: ["enak", "instagramable"],
+                description: "Cafe yang menyajikan beragam pilihan kopi berkualitas dan camilan lezat.",
+                image: placeImages['bagi-kopi'],
+                reviews: [
+                    { name: "Susie Ncuss", rating: 5, text: "Pelayanannya bagus. Tetap ramah meski sy salah bilang klo saya mau dine in padahal harusnya take away Wkwk.", date: "2025-04-01" },
+                    { name: "Rizki Mufidah", rating: 5, text: "Nyaman, wangi, dan bersih tempat nya. Makanan dan coffee nya overall good. Pelayanan nya jg ramah, semoga bisa terus dipertahankan kedepannya.", date: "2025-03-28" }
+                ]
+            },
+
+            {
+                id: 'cc-rajawali',
+                name: "CC Rajawali",
+                type: "warung",
+                lat: -7.0038465150411,       
+                lng: 107.61146355250173,
+                specialty: "Aci Terigu Telor, Camilan, dan Minuman",
+                openTime: "10:00",
+                closeTime: "18:00",
+                rating: 4.7,
+                priceRange: "murah",
+                categories: ["murah", "hidden-gem", "enak"],
+                description: "Warung sederhana dengan harga makanan dan minuman yang sangat terjangkau.",
+                image: placeImages['cc-rajawali'],
+                reviews: [
+                    { name: "Yesi Setyo Ningrum", rating: 4, text: "Seru buat papasakan dan berkreasi dan tempatnya nyaman bersih. Bumbunya kurang variatif, harusnya ada garam buat yg ga suka royco.", date: "2022-12-02" },
+                    { name: "Relita Anggun Andayani", rating: 5, text: "Tempatnya ok, ga sempit. kompornya banyak, ada yg semeja satu kompor, ada yg 2 kompor ada yg 3 kompor juga. datengnya jangan kesorean nanti penuh. parkir juga se ikhlasnya, ada masjid disebrangnya btw.", date: "2021-11-30" }
+                ]
+            },
+
+            {
+                id: 'gokana-ramen-teppan',
+                name: "Gokana: Ramen & Teppan",
+                type: "restaurant",
+                lat: -6.9290209281012825,               
+                lng: 107.58613372883597,
+                specialty: "Ramen, Bento, dan Teppan",
+                openTime: "10:00",
+                closeTime: "22:00",
+                rating: 4.5,
+                priceRange: "sedang",
+                categories: ["enak", "keluarga"],
+                description: "Restoran dengan cita rasa Jepang yang autentik, menyajikan berbagai pilihan menu seperti ramen, bento, dan teppan dengan harga terjangkau.",
+                image: placeImages['gokana-ramen-teppan'],
+                reviews: [
+                    { name: "C. Hardy", rating: 4, text: "Decent price, portion, and tastes for Gokana in general. Last time I tried 'Express A (Fry Mix, Rice, Salad)', it tastes good. Services were quite satisfying. The place was quite big, clean, and comfortable. Good place to eat and hangout with your friends or family.", date: "2025-05-25" },
+                    { name: "Nisaa", rating: 5, text: "Makanan nya enak bangett bikin kenyang,dan juga pelayanan nya sangat baguss dan ramah mantap banget deh pokoknya, jangan lupa dateng kesini yaaaa guys harganya juga ramah di kantong 😍", date: "2025-05-28" }
+                ]
+            },
+
+            {
+                id: 'mirukiway',
+                name: "MirukiWay (Milkyway)",
+                type: "warung",
+                lat: -6.96847265184004,         
+                lng: 107.63447247948534,
+                specialty: "Boba Drink, Bubble Tea, dan Ice Cream",
+                openTime: "09:30",
+                closeTime: "20:30",
+                rating: 4.7,
+                priceRange: "murah",
+                categories: ["enak", "murah", "hidden-gem"],
+                description: "Mirukiway adalah tempat minum kekinian yang menyajikan berbagai pilihan boba drink, bubble tea, ice cream, dan minuman segar lainnya.",
+                image: placeImages['mirukiway'],
+                reviews: [
+                    { name: "Della", rating: 5, text: "Ice cream matcha nya enak parah! Tipikal matcha yang pait dijadiin ice cream lembut dingin. Aduhh enakk bgtt! Terus full sampe cone bawahnya. Selain menu minuman dan es krim, disini ada juga menu makanannya. Mungkin next bakal cobain. Kasir ramah dan tangkas. Tempat parkir terbatas, mobil bakal kesulitan parkir.", date: "2025-01-02" },
+                    { name: "Nurul Farihani", rating: 5, text: "Kesini cuma mau beli Melon soda dan vanilla late nya.. enakkk.", date: "2025-05-29" }
+                ]
+            },
+
+            {
+                id: 'bakso-japra',
+                name: "Mie Ayam & Bakso Japra",
+                type: "warung",
+                lat: -6.968532803141272,
+                lng: 107.63450196599312,
+                specialty: "Mie Ayam & Bakso",
+                openTime: "11:00",
+                closeTime: "17:00",
+                rating: 4.6,
+                priceRange: "murah",
+                categories: ["enak", "murah"],
+                description: "Mie Ayam & Bakso Japra menyajikan mie ayam dan bakso dengan cita rasa khas, kuah gurih, serta porsi yang mengenyangkan.",
+                image: placeImages['bakso-japra'],
+                reviews: [
+                    { name: "Della", rating: 5, text: "Baksonya kenyal dan isian cincang melimpah. Kaldu tidak begitu gurih namun masih oke untuk diseruput. Harganya terjangkau untuk poris dan rasa yang mantap. Untuk makan ditempat kurang enak karena sempit jadi kalau bawa ramean kurang cocok. Pelayanan sangat baik, aa aa nya pinter soalnya inget semua pesanan dari macem2 pelanggan dalam sekali waktu tanpa dicatat. Lokasi depan SMA 1 Dayeuhkolot.", date: "2025-01-01" },
+                    { name: "Cecilia On", rating: 4, text: "Kesini pas sore rame, beli yg mie bakso telor sama cincang harga 15k, minum beli sendiri 3k. Parkir 2k menurut saya baksonya enak, texture nya kriuk gede jg, kuahnya mantap minus sambel nya kurang pol, trs panas banget didalem parkir jg sempit karena banyak yg beli.", date: "2024-06-28" }
+                ]
+            },
+            
+            {
+                id: 'babydutch-pancake',
+                name: "Baby Dutch Pancake",
+                type: "restaurant",
+                lat: -6.868691571845037,
+                lng: 107.4691133972941,
+                specialty: "Pancake",
+                openTime: "10:00",
+                closeTime: "22:00",
+                rating: 4.9,
+                priceRange: "sedang",
+                categories: ["romantis", "keluarga", "instagramable"],
+                description: "Baby Dutch Pancake menyajikan pancake khas Belanda yang lembut, renyah di pinggir, dan disajikan hangat dengan berbagai topping manis maupun gurih. Cocok untuk sarapan, brunch, atau camilan sore, tempat ini menawarkan suasana nyaman dan estetik yang cocok untuk bersantai atau foto-foto cantik.",
+                image: placeImages['babydutch-pancake'],
+                reviews: [
+                    { name: "Nelly Wulansari", rating: 5, text: "Makanannya ga ada yang gagal. Nutella Pancakenya enak banget. Perpaduan rasa manis, dan asam yang balance. Pasta Bakar Se'i porsinya lumayan mengenyangkan. Potongan daging sapinya juga banyak. Rasa pastanya gurih. Staffnya ramah dan sigap. Makanan yang disajikan juga lumayan cepat. Tempatnya nyaman dan adem karena di sekitarnya banyak pepohonan yang menambah kesan asri.", date: "2025-05-16" },
+                    { name: "John Wick", rating: 5, text: "Pancake nya unik, ada menu rosti, pasta , nasi  suasananya adem kalo berkunjung pagi-pagi, rasa makanan oke, nasi goreng nya the best, pelayanannya bagus, staff nya ramah-ramah cepat tanggap 👍👍.", date: "2025-06-09" }
+                ]
+            },
+
+            {
+                id: 'brunswick-cafe',
+                name: "Brunswick Cafe",
+                type: "kafe",
+                lat: -6.867943288971116,
+                lng: 107.63326262698088,
+                specialty: "Coffee, Cake, dan Western Food",
+                openTime: "07:00",
+                closeTime: "22:00",
+                rating: 4.7,
+                priceRange: "sedang",
+                categories: ["romantis", "instagramable"],
+                description: "Brunswick Cafe adalah kafe bergaya modern-industrial yang terkenal dengan menu brunch lezat, kopi premium, dan suasana cozy. Tempat ini cocok untuk nongkrong bareng teman, bekerja dengan laptop, atau sekadar menikmati waktu santai dengan makanan berkualitas dan interior yang instagramable.",
+                image: placeImages['brunswick-cafe'],
+                reviews: [
+                    { name: "Fitri Handayani", rating: 5, text: "Pertama kali kesini , di sajikan makanan pembuka yang luar biasa enaknya. Minuman begitu segar dan arahan dari server mas riki begitu luar biasa di rekomendasikan makanan yang enak poll. Hatur nuhun Brunswick.", date: "2025-05-17" },
+                    { name: "Dian Adriani David", rating: 4, text: "Suasananya bagus ketika kami datang malam hari. Pilihan yang tepat setelah menghadiri event di Intercontinental.", date: "2025-05-26" }
+                ]
+            },
+
+            {
+                id: 'arasso',
+                name: "ARASSO Korean BBQ",
+                type: "restaurant",
+                lat: -6.93744208625714, 
+                lng: 107.61561070832073,
+                specialty: "BBQ Grill & Hotpot",
+                openTime: "11:00",
+                closeTime: "22:00",
+                rating: 4.9,
+                priceRange: "mahal",
+                categories: ["enak", "keluarga"],
+                description: "ARASS0 Korean BBQ adalah restoran All‑You‑Can‑Eat ala Korea di Bandung yang menawarkan pengalaman BBQ & hot pot halal dengan berbagai pilihan kuah (Tom Yum, Collagen, Kombu Dashi, JJigae) dan enam varian saus bumbu marinasi daging seperti Garlic Miso, Spicy Miso, Sweet Tare, Spicy Arasso, dan Plain.",
+                image: placeImages['arasso'],
+                reviews: [
+                    { name: "Aulia Rosalinda", rating: 5, text: "Tempat all you can eat ter-best sih. Makanannya selalu fresh dan lengkap mulai dari snacks, daging, seafood, sayur, berbagai macam pilihan saus, sampai dessert. Pilihan menu daging cukup lengkap dan selalu direfill setiap habis. Banyak promo untuk member dan juga menyediakan Birthday Treat gratis bagi yang ulang tahun. Lebih disarankan untuk reservasi dulu, terutama waktu makan malam karena selalu ramai. Super recommended and worth every penny.", date: "2025-01-09" },
+                    { name: "Nadya Andia", rating: 5, text: "Pelayanannya ramah semuaaa, makanannya enak enakk!! Lengkap jugaa, suasananyaa nyamann, harganya juga terjangkau bgt, thank u arasso udah kasih suprise ulang tahunnyaa🥹🫶🏻.", date: "2025-02-20" }
+                ]
+            },
+
+            {
+                id: 'tom-sushi',
+                name: "Tom Sushi",
+                type: "restaurant",
+                lat: -6.8888119898368565, 
+                lng: 107.5959975441748,
+                specialty: "Ramen & Sushi",
+                openTime: "10:00",
+                closeTime: "21:00",
+                rating: 4.7,
+                priceRange: "murah",
+                categories: ["enak", "murah", "keluarga"],
+                description: "Tom Sushi adalah restoran Jepang kaitenzushi (conveyor belt sushi) HALAL di Bandung—cabang dari Sushi Tei Group—menyajikan sushi segar dengan sistem warna piring: kuning (Rp 10 000), merah (15 000), biru (20 000), dan hitam (25 000) 🟨🟥🟦⬛.",
+                image: placeImages['tom-sushi'],
+                reviews: [
+                    { name: "Shinta Wardhani", rating: 4, text: "Buat yang pengen sushi tapi fokus di harga bisa coba ini. Dia tipe yg pakai conveyor, kl mau pesen bisa ke waitress/scan barcode. Harga plate sesuai warna: 10k, 15k, 20k, 25k. Buat lidahku, sushinya mirip2 semua rasanya. Ukuran dan porsi per plate kecil sih. Butuh banyak porsi baru kenyang. Dateng pas maksi di weekend, rame banget sampai waiting list.", date: "2025-01-11" },
+                    { name: "Renata Rahma Putri", rating: 5, text: "Yang mau makan sushi conveyor halal dan murah disini, pelayanannya bagus, server dan kasirnya ramah dan murah senyum. Makanannya enak, cuman agak sedikit kecewa dengan suasananya terlalu agak bising, saya bisa maklumkan karena agak rame. Salmon-nya fresh, but sushinya terlalu banyak pakai mayones agak bikin eneg kalau pesan banyak menu.", date: "2025-06-03" }
+                ]
+            },
+
+            {
+                id: 'raa-cha',
+                name: "Raa Cha Suki & BBQ",
+                type: "restaurant",
+                lat: -6.893256616221685, 
+                lng: 107.60512145064816,
+                specialty: "Suki & BBQ",
+                openTime: "10:00",
+                closeTime: "22:00",
+                rating: 4.5,
+                priceRange: "mahal",
+                categories: ["enak", "keluarga"],
+                description: "Raa Cha Suki & BBQ adalah restoran Thai-style all-you-can-eat di Bandung yang menyajikan kombinasi suki (hot pot) dan BBQ dalam konsep self-service. Pengunjung bisa memilih sendiri bahan makanan segar—sayuran, daging, seafood—untuk direbus dalam pilihan kuah chicken broth atau tom yum, atau dipanggang langsung di meja .",
+                image: placeImages['raa-cha'],
+                reviews: [
+                    { name: "Dadan Hamdani", rating: 5, text: "Pelayanan nya oke banget memuaskan, menunya super kompliiitt, banyak promo, tempat bersih nyaman banget pkk nya, wajib datang gess 👍👍👍.", date: "2024-10-13" },
+                    { name: "Zahra Pitaloka", rating: 4, text: "Kalau lagi pengen BBQ atau Suki, selalu kesini dari dulu. Bukan all you can eat sih, tapi ala carte. Pilihannya banyak, mau daging atau seafood semuanya ada. Pegawainya ramah, begitu sampai langsung ditujukan mau dimana duduknya dan langsung disiapkan. Saya pilih di lantai dua, tapi sayang lagi ada perbaikan kecil di lantai dua jadi agak keganggu dan AC nya nggak nyala.", date: "2024-06-06" }
+                ]
+            },
+
+            {
+                id: 'kabobs',
+                name: "Kabobs Premium Kebab",
+                type: "warung",
+                lat: -6.887665283574065, 
+                lng: 107.61549864977903,
+                specialty: "Kebab",
+                openTime: "09:00",
+                closeTime: "23:00",
+                rating: 4.6,
+                priceRange: "murah",
+                categories: ["enak"],
+                description: "Kabobs - Kebab Premium menghadirkan cita rasa kebab berkualitas tinggi dengan paduan daging pilihan, sayuran segar, dan saus khas yang menggoda. Cocok untuk pecinta makanan cepat saji yang ingin tetap merasakan kelezatan khas Timur Tengah dalam balutan modern dan praktis.",
+                image: placeImages['kabobs'],
+                reviews: [
+                    { name: "Indriani Lestari", rating: 5, text: "Kabobs ini strategis tempatnya karena dekat dengan kampus, travel. Tempatnya juga bisa dine in walau tidak terlalu luas.", date: "2025-01-21" },
+                    { name: "Agung Pratama", rating: 5, text: "Ga pernah ada complaint kalau makan Kabobs, selalu enak... Fresh dan worthed to buy!!! Pelayanannya juga asik dan yang penting CEPET!!! Terima kasih...", date: "2025-01-10" }
+                ]
+            },
+            
+            {
+                id: 'carita-izakaya',
+                name: "Carita Izakaya",
+                type: "restaurant",
+                lat: -6.918342403941702, 
+                lng: 107.60962817116402,
+                specialty: "Ramen",
+                openTime: "11:00",
+                closeTime: "00:00",
+                rating: 4.8,
+                priceRange: "sedang",
+                categories: ["hidden-gem", "keluarga", "enak"],
+                description: "Carita Izakaya adalah restoran ramen dan izakaya bergaya Jepang yang menyajikan pengalaman kuliner autentik di tengah suasana hangat dan nyaman. Menu andalannya meliputi berbagai varian ramen dengan kuah gurih khas Jepang, serta beragam hidangan pendamping seperti karaage, gyoza, dan yakitori.",
+                image: placeImages['carita-izakaya'],
+                reviews: [
+                    { name: "Sahiraaz", rating: 5, text: "Hidden gem di daerah Braga. Kesini karena nginep disatu gedung yang sama. Lokasinya ada di rooftop, jadi suasananya cozy. Makanan dan minumannya oke. Plus pelayanannya ramah ramah bgt!", date: "2025-02-12" },
+                    { name: "Anindhita Maharani", rating: 5, text: "Enak bgt ramennyaaaaaaa, view nya jg oke bgtt, mas mas nya helpfull bgttt, suami aku pesen mocktail ditanyain mau yg rasa gimana bisa request , tapi capekkkkk jalannya hahahahha karna naik ke rooftop full tangga 😆.", date: "2025-05-14" }
+                ]
+            },
+            
+            {
+                id: 'caluna-all-day',
+                name: "Calluna All Day",
+                type: "restaurant",
+                lat: -6.904856426876881, 
+                lng: 107.60149594099269,
+                specialty: "Western & Asian Food",
+                openTime: "09:00",
+                closeTime: "22:00",
+                rating: 4.8,
+                priceRange: "mahal",
+                categories: ["romantis", "instagramable"],
+                description: "Caluna All Day Romance adalah kafe dan restoran dengan nuansa romantis yang menawan, cocok untuk pasangan maupun sahabat. Dengan interior estetik dan pemandangan kota Bandung yang memesona, Caluna menyajikan menu fusion dari hidangan lokal dan western yang cocok dinikmati dari pagi hingga malam.",
+                image: placeImages['caluna-all-day'],
+                reviews: [
+                    { name: "Shella 12", rating: 5, text: "Gak salah pilih tempat Romantic Dinner di Calluna. Mulai dari lokasi, ambience, makanan minuman dan servicenya oke banget semua. Aku pilih paket Romantic Dinner dengan harga yang sangat worth it dengan apa yang didapat. Pelayanan dari kak Rangga dari Calluna nya juga oke banget dijelasin secara detail tiap makanan dan minuman yang disajikan. Calluna sangat recommended!!! 🩷.", date: "2025-06-13" },
+                    { name: "Setiawan Tatamiharja", rating: 4, text: "Chicken Parmagiano nya OK. Daging ayam nya masih juicy, wedges nya enak. Saus jamur nya kurang banyak. Overall 7.5/10. Iga Panggang Asam Pedas. Kuah nya enak. Lekoh bumbu nya juga, tekstur iga nya need to be improved karena masih agak keras. Kalau tekstur nya empuk 9/10. Sementara 6.5/10. Cheese pizza nya kurang kerasa si cheese nya. Dough nya lucu kaya foccacia. Tapi memang ngga semahal Quatro Formaggi di resto khusus masakan italia atau khusus pizza gitu. 7/10 kurang lebih.", date: "2025-05-16" }
+                ]
+            },
+            
+            {
+                id: 'reddog',
+                name: "Reddog",
+                type: "warung",
+                lat: -6.925713333730091, 
+                lng: 107.63610537948452,
+                specialty: "Korean Hotdog & Topokki",
+                openTime: "10:00",
+                closeTime: "21:00",
+                rating: 3.6,
+                priceRange: "murah",
+                categories: ["murah", "enak"],
+                description: "RedDog adalah restoran street food Korea yang terkenal dengan menu andalannya seperti corn dog renyah, tteokbokki pedas, dan ramyeon hangat. Mengusung konsep cepat saji dengan rasa otentik Korea, RedDog cocok untuk pencinta makanan Korea yang ingin menikmati camilan kekinian dengan suasana kasual dan nyaman.",
+                image: placeImages['reddog'],
+                reviews: [
+                    { name: "Maulinuri Gandasari", rating: 4, text: "Rasanya enaaaakkk, tapi minus mozzarella nya gak lumer:(Apa karena ngantri bgt ya jadi agak kurang teliti pas hari itu? Overall good, sesuai request💯.", date: "2025-02-10"},
+                    { name: "Rizkha RM", rating: 4, text: "Tempatnya kurang dine in friendly karena kecil, kaya tempat buat tunggu aja, teokkbokkinya juara, sausnya enak banget sesuai sama lidah Indonesia, odengnya gede2 dan enak juga, taapii untuk hotdognya kurang masuk di aku aja, range harga mulai dari 20rban kalo gak salah untuk cup kecil lumayan pricey tapi enak.", date: "2024-11-09"}
+                ]
+            },
+            
+            {
+                id: 'kisah-manis',
+                name: "Kisah Manis",
+                type: "kafe",
+                lat: -6.918619678895439,  
+                lng: 107.61774116599241,
+                specialty: "Coffee & Snack",
+                openTime: "07:00",
+                closeTime: "22:00",
+                rating: 4.9,
+                priceRange: "murah",
+                categories: ["instagramable", "enak"],
+                description: "Kisah Manis adalah tempat nongkrong yang menawarkan suasana hangat dan nyaman di tengah hiruk pikuk kota Bandung. Dengan interior bergaya rustic modern dan sentuhan estetik di setiap sudutnya, kedai ini cocok untuk bersantai, bekerja, atau berkumpul bersama teman. Kisah Manis terkenal dengan sajian kopi spesialti, beragam menu minuman manis, serta camilan rumahan yang menggugah selera. Tempat ini menjadi pilihan ideal untuk menulis kisah manis kamu sendiri, ditemani secangkir kopi yang diracik dengan penuh cinta.",
+                image: placeImages['kisah-manis'],
+                reviews: [
+                    { name: "Naura Athira", rating: 5, text: "Kisah Manis Sunda bener-bener tempat yang cozy banget buat ngerjain tugas atau sekedar ngobrol-ngobrol! Pilihan tempatnya bisa pilih indoor dan outdoor dengan banyak kursi. Ada mushola nya juga, jd ga perlu cari tempat sholat di luar cafe, disini lengkap✨ Makanannya juga enak, aku pesen Nasi Karaage Kari🍛 (8.5/10) dan Kopi Aren☕️ (9/10). Pelayanannya juga ramah love banget💗 Very recommended deh, bakal balik lagi kesiniii!", date: "2025-06-04"},
+                    { name: "Rizky Putri Jasmine", rating: 5, text: "First, disini ada photoboxnya, jadi langsung cus bisa foto saat make up masih on-point, 614 sih, moment pas banget; second, servicenya ok, barang ditinggal aman, amanah; third, atmospherenya itu, keknya lain kali kesini harus bawa novel deh, suasananya enak buat baca buku; fourth, makanannya beragam, dan insta worthy tata letaknya; fifth, bonus ice cream klo first time google review uwu.", date: "2025-06-14"}
+                ]
+            },   
+        ];
+
+        // Global variables
+        let filteredPlaces = [...foodPlaces];
+        let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+        let markers = {};
+        let map;
+
+        // Initialize map
+        function initMap() {
+            map = L.map('map').setView([-6.9175, 107.6191], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            
+            addMarkersToMap(filteredPlaces);
+        }
+
+        // Function to check if place is open
+        function isOpen(openTime, closeTime) {
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            const currentTime = currentHour * 60 + currentMinute;
+            
+            const [openH, openM] = openTime.split(':').map(Number);
+            const [closeH, closeM] = closeTime.split(':').map(Number);
+            
+            const openMinutes = openH * 60 + openM;
+            const closeMinutes = closeH * 60 + closeM;
+            
+            if (closeMinutes > openMinutes) {
+                return currentTime >= openMinutes && currentTime <= closeMinutes;
+            } else {
+                // Crosses midnight
+                return currentTime >= openMinutes || currentTime <= closeMinutes;
+            }
+        }
+
+        // Generate star rating HTML
+        function generateStars(rating) {
+            let stars = '';
+            for (let i = 1; i <= 5; i++) {
+                if (i <= rating) {
+                    stars += '<i class="fas fa-star"></i>';
+                } else if (i - 0.5 <= rating) {
+                    stars += '<i class="fas fa-star-half-alt"></i>';
+                } else {
+                    stars += '<i class="far fa-star"></i>';
+                }
+            }
+            return stars;
+        }
+
+        // Define custom icons
+        const icons = {
+            warung: L.divIcon({
+                html: '<div style="background: #ff6b6b; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 2px 10px rgba(0,0,0,0.3);">🏪</div>',
+                iconSize: [30, 30],
+                className: 'custom-marker'
+            }),
+            kafe: L.divIcon({
+                html: '<div style="background: #4ecdc4; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 2px 10px rgba(0,0,0,0.3);">☕</div>',
+                iconSize: [30, 30],
+                className: 'custom-marker'
+            }),
+            restaurant: L.divIcon({
+                html: '<div style="background: #45b7d1; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 2px 10px rgba(0,0,0,0.3);">🍴</div>',
+                iconSize: [30, 30],
+                className: 'custom-marker'
+            })
+        };
+
+        // Add markers to map
+        function addMarkersToMap(places) {
+            // Clear existing markers
+            Object.values(markers).forEach(marker => map.removeLayer(marker));
+            markers = {};
+
+            places.forEach(place => {
+                const isCurrentlyOpen = isOpen(place.openTime, place.closeTime);
+                const statusText = isCurrentlyOpen ? 
+                    '<span class="status-open">🟢 BUKA</span>' : 
+                    '<span class="status-closed">🔴 TUTUP</span>';
+
+                const categoryTags = place.categories.map(cat => 
+                    `<span class="popup-category">${getCategoryLabel(cat)}</span>`
+                ).join('');
+
+                const popupContent = `
+                    <div class="popup-content">
+                        <img src="${place.image}" alt="${place.name}" class="popup-image" onerror="this.style.display='none'">
+                        <div class="popup-title">${place.name}</div>
+                        <div class="popup-type">${place.type === 'warung' ? 'Warung' : place.type === 'kafe' ? 'Kafe' : 'Restoran'}</div>
+                        <div class="popup-specialty"><strong>${place.specialty}</strong></div>
+                        <div class="popup-categories">${categoryTags}</div>
+                        <div class="popup-rating">${generateStars(place.rating)} ${place.rating}</div>
+                        <div class="popup-hours">
+                            Jam Buka: ${place.openTime} - ${place.closeTime}<br>
+                            Status: ${statusText}
+                        </div>
+                        <div class="popup-actions">
+                            <button class="popup-btn view-details-btn" onclick="openPlaceModal('${place.id}')">
+                                <i class="fas fa-info-circle"></i> Detail
+                            </button>
+                            <button class="popup-btn favorite-popup-btn" onclick="toggleFavorite('${place.id}', event)">
+                                <i class="fas fa-heart"></i> ${favorites.includes(place.id) ? 'Hapus' : 'Simpan'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                const marker = L.marker([place.lat, place.lng], { icon: icons[place.type] })
+                    .addTo(map)
+                    .bindPopup(popupContent, {
+                        maxWidth: 300,
+                        className: 'custom-popup'
+                    });
+
+                markers[place.id] = marker;
+            });
+        }
+
+        // Get category label
+        function getCategoryLabel(category) {
+            const labels = {
+                'enak': '🔥 Enak',
+                'murah': '💰 Murah',
+                'hidden-gem': '💎 Hidden Gem',
+                'romantis': '💕 Romantis',
+                'keluarga': '👨‍👩‍👧‍👦 Keluarga',
+                'instagramable': '📸 Instagramable'
+            };
+            return labels[category] || category;
+        }
+
+        // Get price label
+        function getPriceLabel(priceRange) {
+            const labels = {
+                'murah': '💰 Murah',
+                'sedang': '💰💰 Sedang',
+                'mahal': '💰💰💰 Mahal'
+            };
+            return labels[priceRange] || priceRange;
+        }
+
+        // Filter places
+        function filterPlaces() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const priceFilter = document.getElementById('priceFilter').value;
+            const ratingFilter = parseFloat(document.getElementById('ratingFilter').value) || 0;
+            const typeFilter = document.getElementById('typeFilter').value;
+            const activeCategoryTags = Array.from(document.querySelectorAll('.category-tag.active')).map(tag => tag.dataset.category);
+
+            filteredPlaces = foodPlaces.filter(place => {
+                const matchesSearch = place.name.toLowerCase().includes(searchTerm) || 
+                                    place.specialty.toLowerCase().includes(searchTerm) ||
+                                    place.description.toLowerCase().includes(searchTerm);
+                const matchesPrice = priceFilter === '' || place.priceRange === priceFilter;
+                const matchesRating = place.rating >= ratingFilter;
+                const matchesType = typeFilter === '' || place.type === typeFilter;
+                const matchesCategory = activeCategoryTags.length === 0 || 
+                                    activeCategoryTags.some(cat => place.categories.includes(cat));
+
+                return matchesSearch && matchesPrice && matchesRating && matchesType && matchesCategory;
+            });
+
+            updatePlacesList();
+            addMarkersToMap(filteredPlaces);
+        }
+
+        // Update places list
+        function updatePlacesList() {
+            const placesList = document.getElementById('placesList');
+            const placeCount = document.getElementById('placeCount');
+            
+            placeCount.textContent = filteredPlaces.length;
+            
+            if (filteredPlaces.length === 0) {
+                placesList.innerHTML = '<p style="text-align: center; color: #888; padding: 20px;">Tidak ada tempat yang sesuai dengan filter.</p>';
+                return;
+            }
+
+            placesList.innerHTML = filteredPlaces.map(place => {
+                const isCurrentlyOpen = isOpen(place.openTime, place.closeTime);
+                const statusText = isCurrentlyOpen ? 'BUKA' : 'TUTUP';
+                const statusClass = isCurrentlyOpen ? 'status-open' : 'status-closed';
+                const isFavorite = favorites.includes(place.id);
+                
+                return `
+                    <div class="place-item ${isFavorite ? 'favorite' : ''}" onclick="focusOnPlace('${place.id}')">
+                        <div class="place-header">
+                            <div class="place-name">${place.name}</div>
+                            <button class="favorite-btn ${isFavorite ? 'active' : ''}" onclick="event.stopPropagation(); toggleFavorite('${place.id}')">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </div>
+                        <img src="${place.image}" alt="${place.name}" class="place-image" onerror="this.style.display='none'">
+                        <div class="place-info">
+                            <div class="place-rating">${generateStars(place.rating)} ${place.rating}</div>
+                            <div class="place-price">${getPriceLabel(place.priceRange)}</div>
+                            <div class="place-category">${place.categories.map(cat => getCategoryLabel(cat).split(' ')[1]).join(', ')}</div>
+                        </div>
+                        <div class="place-specialty">${place.specialty}</div>
+                        <div style="font-size: 12px; color: #666; margin-bottom: 5px;">
+                            ${place.openTime} - ${place.closeTime} • <span class="${statusClass}">${statusText}</span>
+                        </div>
+                        <div class="place-reviews">
+                            <div class="review-summary">${place.reviews.length} ulasan</div>
+                            ${place.reviews.length > 0 ? `
+                                <div class="latest-review">
+                                    "${place.reviews[0].text}" - ${place.reviews[0].name}
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Update favorites list
+        function updateFavoritesList() {
+            const favoritesList = document.getElementById('favoritesList');
+            const favCount = document.getElementById('favCount');
+            
+            favCount.textContent = favorites.length;
+            
+            if (favorites.length === 0) {
+                favoritesList.innerHTML = `
+                    <div class="empty-favorites">
+                        <i class="fas fa-heart-broken"></i>
+                        <h3>Belum ada tempat favorit</h3>
+                        <p>Klik ❤️ pada tempat makan untuk menyimpannya di sini</p>
+                        <button class="browse-btn" onclick="document.querySelector('#beranda').scrollIntoView({ behavior: 'smooth' })">
+                            <i class="fas fa-search"></i> Jelajahi Tempat Makan
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            const favoritePlaces = foodPlaces.filter(place => favorites.includes(place.id));
+            favoritesList.innerHTML = `
+                <div class="favorites-grid">
+                    ${favoritePlaces.map(place => {
+                        const isCurrentlyOpen = isOpen(place.openTime, place.closeTime);
+                        const statusText = isCurrentlyOpen ? 'BUKA' : 'TUTUP';
+                        const statusClass = isCurrentlyOpen ? 'status-open' : 'status-closed';
+                        
+                        return `
+                            <div class="favorite-card" onclick="focusOnPlace('${place.id}')">
+                                <div class="card-header">
+                                    <div>
+                                        <div class="place-name">${place.name}</div>
+                                        <div class="place-type">${place.type === 'warung' ? 'Warung' : place.type === 'kafe' ? 'Kafe' : 'Restoran'}</div>
+                                    </div>
+                                    <button class="remove-favorite" onclick="event.stopPropagation(); toggleFavorite('${place.id}')">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <p class="place-specialty">${place.specialty}</p>
+                                <div class="place-rating">
+                                    <span class="stars">${generateStars(place.rating)}</span>
+                                    <span class="rating-text">${place.rating} (${place.reviews.length} ulasan)</span>
+                                </div>
+                                <div class="place-price ${'price-' + place.priceRange}">${getPriceLabel(place.priceRange)}</div>
+                                <div class="place-categories">
+                                    ${place.categories.map(cat => 
+                                        `<span class="category-tag">${getCategoryLabel(cat).split(' ')[1]}</span>`
+                                    ).join('')}
+                                </div>
+                                <div style="font-size: 12px; color: #666; margin: 10px 0;">
+                                    ${place.openTime} - ${place.closeTime} • <span class="${statusClass}">${statusText}</span>
+                                </div>
+                                <div class="card-actions">
+                                    <button class="view-details-btn" onclick="event.stopPropagation(); openPlaceModal('${place.id}')">
+                                        <i class="fas fa-info-circle"></i> Detail
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        // Toggle favorite
+                function toggleFavorite(placeId, event = null) {
+            if (event) event.stopPropagation();
+            if (favorites.includes(placeId)) {
+                favorites = favorites.filter(id => id !== placeId);
+            } else {
+                favorites.push(placeId);
+            }
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+            updatePlacesList();
+            updateFavoritesList();
+            
+            // Update popup if open
+            const popups = document.querySelectorAll('.leaflet-popup');
+            popups.forEach(popup => {
+                if (popup.style.display !== 'none') {
+                    const place = foodPlaces.find(p => p.id === placeId);
+                    if (place) {
+                        // Refresh the popup content
+                        const marker = markers[placeId];
+                        if (marker) {
+                            marker.closePopup();
+                            setTimeout(() => marker.openPopup(), 100);
+                        }
+                    }
+                }
+            });
+        }
+
+        // Focus on place
+        function focusOnPlace(placeId) {
+            const place = foodPlaces.find(p => p.id === placeId);
+            if (place && markers[placeId]) {
+                map.setView([place.lat, place.lng], 16);
+                markers[placeId].openPopup();
+            }
+        }
+
+        // Open place modal
+        function openPlaceModal(placeId) {
+            const place = foodPlaces.find(p => p.id === placeId);
+            if (!place) return;
+
+            const modal = document.getElementById('placeModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+
+            modalTitle.textContent = place.name;
+
+            const isCurrentlyOpen = isOpen(place.openTime, place.closeTime);
+            const statusText = isCurrentlyOpen ? 
+                '<span class="status-open">🟢 BUKA</span>' : 
+                '<span class="status-closed">🔴 TUTUP</span>';
+
+            const categoryTags = place.categories.map(cat => 
+                `<span class="category-tag" style="font-size: 12px; padding: 4px 8px;">${getCategoryLabel(cat)}</span>`
+            ).join('');
+
+            modalBody.innerHTML = `
+                <img src="${place.image}" alt="${place.name}" class="modal-image" onerror="this.style.display='none'">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <div>
+                        <div style="font-size: 18px; color: #7f8c8d; margin-bottom: 5px;">${place.type === 'warung' ? 'Warung' : place.type === 'kafe' ? 'Kafe' : 'Restoran'}</div>
+                        <div style="color: #f39c12; font-size: 18px;">${generateStars(place.rating)} ${place.rating}</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 16px; font-weight: bold; color: #27ae60;">${getPriceLabel(place.priceRange)}</div>
+                        <div style="font-size: 14px; margin-top: 5px;">${statusText}</div>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <strong>Spesialisasi:</strong> ${place.specialty}
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <strong>Deskripsi:</strong> ${place.description}
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <strong>Jam Buka:</strong> ${place.openTime} - ${place.closeTime}
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <strong>Kategori:</strong><br>
+                    <div style="margin-top: 8px;">${categoryTags}</div>
+                </div>
+
+                <div class="reviews-list">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Ulasan (${place.reviews.length})</h4>
+                    ${place.reviews.map(review => `
+                        <div class="review-item">
+                            <div class="review-header">
+                                <span class="reviewer-name">${review.name}</span>
+                                <span class="review-date">${new Date(review.date).toLocaleDateString('id-ID')}</span>
+                            </div>
+                            <div class="review-stars">${generateStars(review.rating)}</div>
+                            <div class="review-text">${review.text}</div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div class="review-form">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Berikan Ulasan</h4>
+                    <div class="star-rating" id="starRating">
+                        ${[1,2,3,4,5].map(i => `<span class="star" data-rating="${i}">★</span>`).join('')}
+                    </div>
+                    <textarea class="review-input" id="reviewText" placeholder="Tulis ulasan Anda..."></textarea>
+                    <input type="text" id="reviewerName" placeholder="Nama Anda" style="width: 100%; padding: 8px; margin: 10px 0; border: 2px solid #e0e6ed; border-radius: 6px;">
+                    <button class="submit-review" onclick="submitReview('${place.id}')">Kirim Ulasan</button>
+                </div>
+            `;
+
+            // Add star rating functionality
+            const stars = modalBody.querySelectorAll('.star');
+            let selectedRating = 0;
+            
+            stars.forEach(star => {
+                star.addEventListener('mouseover', function() {
+                    const rating = parseInt(this.dataset.rating);
+                    updateStarDisplay(stars, rating);
+                });
+                
+                star.addEventListener('click', function() {
+                    selectedRating = parseInt(this.dataset.rating);
+                    updateStarDisplay(stars, selectedRating);
+                });
+            });
+            
+            modalBody.querySelector('#starRating').addEventListener('mouseleave', function() {
+                updateStarDisplay(stars, selectedRating);
+            });
+
+            modal.style.display = 'block';
+        }
+
+        // Update star display
+        function updateStarDisplay(stars, rating) {
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
+
+        // Submit review
+        function submitReview(placeId) {
+            const reviewText = document.getElementById('reviewText').value;
+            const reviewerName = document.getElementById('reviewerName').value;
+            const stars = document.querySelectorAll('.star');
+            let rating = 0;
+            
+            stars.forEach(star => {
+                if (star.classList.contains('active')) {
+                    rating = Math.max(rating, parseInt(star.dataset.rating));
+                }
+            });
+
+            if (!reviewText || !reviewerName || rating === 0) {
+                alert('Mohon lengkapi semua field ulasan!');
+                return;
+            }
+
+            const place = foodPlaces.find(p => p.id === placeId);
+            if (place) {
+                const newReview = {
+                    name: reviewerName,
+                    rating: rating,
+                    text: reviewText,
+                    date: new Date().toISOString().split('T')[0]
+                };
+                
+                place.reviews.unshift(newReview);
+                
+                // Recalculate average rating
+                const avgRating = place.reviews.reduce((sum, r) => sum + r.rating, 0) / place.reviews.length;
+                place.rating = Math.round(avgRating * 10) / 10;
+                
+                // Close modal and refresh
+                document.getElementById('placeModal').style.display = 'none';
+                updatePlacesList();
+                addMarkersToMap(filteredPlaces);
+                
+                alert('Ulasan berhasil ditambahkan!');
+            }
+        }
+
+        // Clear all favorites
+        document.getElementById('clearFavorites').addEventListener('click', function() {
+            if (confirm('Apakah Anda yakin ingin menghapus semua favorit?')) {
+                favorites = [];
+                localStorage.setItem('favorites', JSON.stringify(favorites));
+                updateFavoritesList();
+                updatePlacesList();
+            }
+        });
+
+        // Smooth scrolling for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+                
+                // Update active nav link
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('active');
+                });
+                this.classList.add('active');
+            });
+        });
+
+        // Update active nav link on scroll
+        window.addEventListener('scroll', function() {
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+
+            // Navbar effect on scroll
+            const navbar = document.querySelector('.navigation');
+            if (window.pageYOffset > 50) {
+                navbar.style.background = 'rgba(255, 255, 255, 0.95)';
+                navbar.style.boxShadow = '0 4px 30px rgba(0, 0, 0, 0.15)';
+            } else {
+                navbar.style.background = 'rgba(255, 255, 255, 0.9)';
+                navbar.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.1)';
+            }
+        });
+
+        // Event listeners
+        document.getElementById('searchInput').addEventListener('input', filterPlaces);
+        document.getElementById('priceFilter').addEventListener('change', filterPlaces);
+        document.getElementById('ratingFilter').addEventListener('change', filterPlaces);
+        document.getElementById('typeFilter').addEventListener('change', filterPlaces);
+
+        // Category tag event listeners
+        document.querySelectorAll('.category-tag').forEach(tag => {
+            tag.addEventListener('click', function() {
+                this.classList.toggle('active');
+                filterPlaces();
+            });
+        });
+
+        // Modal event listeners
+        document.querySelector('.close').addEventListener('click', function() {
+            document.getElementById('placeModal').style.display = 'none';
+        });
+
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('placeModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        // Initialize
+        initMap();
+        filterPlaces();
+        updateFavoritesList();
+        
+        // Update stats
+        document.getElementById('totalPlaces').textContent = foodPlaces.length;
+        document.getElementById('totalReviews').textContent = foodPlaces.reduce((sum, place) => sum + place.reviews.length, 0);
+        document.getElementById('avgRating').textContent = (foodPlaces.reduce((sum, place) => sum + place.rating, 0) / foodPlaces.length).toFixed(1);
+
+        // Add popup styling
+        const style = document.createElement('style');
+        style.textContent = `
+            .custom-marker {
+                background: none !important;
+                border: none !important;
+            }
+            
+            .leaflet-popup-content-wrapper {
+                border-radius: 15px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            }
+            
+            .leaflet-popup-tip {
+                background: white;
+            }
+            
+            @keyframes fadeInScale {
+                from {
+                    opacity: 0;
+                    transform: scale(0.8);
+                }
+                to {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+            }
+            
+            .popup-content {
+                text-align: center;
+                min-width: 250px;
+            }
+            
+            .popup-title {
+                font-size: 18px;
+                font-weight: bold;
+                color: #2c3e50;
+                margin-bottom: 8px;
+            }
+            
+            .popup-image {
+                width: 100%;
+                height: 120px;
+                object-fit: cover;
+                border-radius: 8px;
+                margin-bottom: 10px;
+            }
+            
+            .popup-type {
+                color: #7f8c8d;
+                font-style: italic;
+                margin-bottom: 8px;
+            }
+            
+            .popup-specialty {
+                color: #34495e;
+                margin-bottom: 10px;
+            }
+            
+            .popup-hours {
+                font-size: 14px;
+                background: #ecf0f1;
+                padding: 8px;
+                border-radius: 8px;
+                margin-bottom: 8px;
+            }
+            
+            .popup-rating {
+                color: #f39c12;
+                font-size: 16px;
+                margin-bottom: 8px;
+            }
+            
+            .popup-categories {
+                display: flex;
+                gap: 5px;
+                justify-content: center;
+                margin-bottom: 10px;
+            }
+            
+            .popup-category {
+                background: #f0f0f0;
+                color: #666;
+                padding: 2px 6px;
+                border-radius: 4px;
+                font-size: 10px;
+            }
+            
+            .popup-actions {
+                display: flex;
+                gap: 10px;
+                justify-content: center;
+                margin-top: 10px;
+            }
+            
+            .popup-btn {
+                padding: 6px 12px;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 12px;
+                transition: all 0.3s ease;
+            }
+            
+            .view-details-btn {
+                background: #667eea;
+                color: white;
+            }
+            
+            .favorite-popup-btn {
+                background: #ff6b6b;
+                color: white;
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Add click event to show info
+        map.on('popupopen', function(e) {
+            const popup = e.popup;
+            popup.getElement().style.animation = 'fadeInScale 0.3s ease-out';
+        });
+    </script>
+</body>
+</html>
